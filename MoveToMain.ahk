@@ -5,45 +5,54 @@
 ;;	All files must be in same folder. Where you want.
 ;;	64 bit AHK version : 1.1.24.2 64 bit Unicode
 
-;; option: x y w h OR xy def def
-
 ;;--- Softwares options ---
+
+	SetWorkingDir, %A_ScriptDir%
+	SetTitleMatchMode, 2
+	#NoEnv
+	#SingleInstance Force
+	#Persistent
 
 	SetEnv, title, MoveToMain
 	SetEnv, mode, Move Windows To Main Monitor
-	SetEnv, version, Version 2017-09-29-1417
+	SetEnv, version, Version 2017-10-01-0855
 	SetEnv, Author, LostByteSoft
+	SetEnv, logoicon, ico_recycle.ico
 
 	;; User variable, change if you want anything else.
 	SetEnv, shortkey, F4
 	SetEnv, displacement, 1
 
-	SetWorkingDir, %A_ScriptDir%
-	SetTitleMatchMode, 2
 	SysGet, Mon1, Monitor, 1
 
 	FileInstall, ico_about.ico, ico_about.ico, 0
 	FileInstall, ico_HotKeys.ico, ico_HotKeys.ico, 0
 	FileInstall, ico_lock.ico, ico_lock.ico, 0
 	FileInstall, ico_shut.ico, ico_shut.ico, 0
-	FileInstall, ico_VlcWinMove.ico, ico_VlcWinMove.ico, 0
+	FileInstall, ico_recycle.ico, ico_recycle.ico, 0
 
 ;;--- Tray options
 
 	Menu, Tray, NoStandard
-	Menu, tray, add, ---=== %title% ===---, about0
-	Menu, Tray, Icon, ---=== %title% ===---, ico_VlcWinMove.ico
+	Menu, tray, add, ---=== %title% ===---, about
+	Menu, Tray, Icon, ---=== %title% ===---, %logoicon%
 	Menu, tray, add, Show logo, GuiLogo
 	Menu, tray, add, Secret MsgBox, secret					; Secret MsgBox, just show all options and variables of the program
 	Menu, Tray, Icon, Secret MsgBox, ico_lock.ico
-	Menu, tray, add, About - LostByteSoft, author
-	Menu, Tray, Icon, About - LostByteSoft, ico_about.ico
+	Menu, tray, add, About && ReadMe, author
+	Menu, Tray, Icon, About && ReadMe, ico_about.ico
+	Menu, tray, add, Author %author%, about
+	menu, tray, disable, Author %author%
+	Menu, tray, add, %version%, about
+	menu, tray, disable, %version%
 	Menu, tray, add,
 	Menu, tray, add, Exit, Close						; Close exit program
 	Menu, Tray, Icon, Exit, ico_shut.ico
 	Menu, tray, add,
-	Menu, tray, add, --== Option(s) ==--, about2
+	Menu, tray, add, --== Option(s) ==--, about
 	Menu, Tray, add, Change displacement = %displacement%, changedisp
+	Menu, tray, add, 1 = xywh 0 = xy, about
+	menu, tray, disable, 1 = xywh 0 = xy
 	Menu, tray, add,
 	Menu, Tray, add, Hotkey = %shortkey%, trayclick
 	Menu, Tray, Icon, Hotkey = %shortkey%, ico_HotKeys.ico
@@ -107,21 +116,10 @@ changedisp:
 	return
 
 secret:
-	SetEnv, Var1, %Mon1Right%
-	Var1 /= 12
-	SetEnv, Var2, %Var1%
-	Var2 *= 10
-	SetEnv, Var3, %Mon1Bottom%
-	Var3 /= 8
-	SetEnv, Var4, %Var3%
-	Var4 *= 6
-	MsgBox, 48, %title%,title=%title% mode=%mode% version=%version% author=%author% shortkey=%shortkey% displacement=%displacement% A_ScriptDir=%A_ScriptDir%`n`nNew displacement (if 1) move to %var1% %var3% %var2% %var4% (if 0) move to %var1% %var3% (Automatic calculating according to your screen resolution.).`n`nMain screen resolution Left: %Mon1Left% -- Top: %Mon1Top% -- Right: %Mon1Right% -- Bottom %Mon1Bottom%
+	MsgBox, 48, %title%,title=%title% mode=%mode% version=%version% author=%author% shortkey=%shortkey% displacement=%displacement% logoicon=%logoicon% A_ScriptDir=%A_ScriptDir%`n`nMain screen resolution Left: %Mon1Left% -- Top: %Mon1Top% -- Right: %Mon1Right% -- Bottom %Mon1Bottom%
 	return
 
-about0:
-about1:
-about2:
-about3:
+about:
 	TrayTip, %title%, %mode% %author%, 2, 1
 	Return
 
@@ -130,11 +128,19 @@ version:
 	Return
 
 author:
-	MsgBox, 64, %title%, %title% %mode% %version% %author% This software is usefull when windows goes off the sreen resolution and dissapear.`n`n`tGo to https://github.com/LostByteSoft
+	SetEnv, Var1, %Mon1Right%
+	Var1 /= 12
+	SetEnv, Var2, %Var1%
+	Var2 *= 10
+	SetEnv, Var3, %Mon1Bottom%
+	Var3 /= 8
+	SetEnv, Var4, %Var3%
+	Var4 *= 6
+	MsgBox, 64, %title%, %title% %mode% %version% %author% This software is usefull when windows goes off the sreen resolution and dissapear. New displacement (if 1) move to %var1% %var3% %var2% %var4% (if 0) move to %var1% %var3% (Automatic calculating according to your screen resolution.).`n`n`tGo to https://github.com/LostByteSoft
 	Return
 
 GuiLogo:
-	Gui, Add, Picture, x25 y25 w400 h400 , ico_VlcWinMove.ico
+	Gui, Add, Picture, x25 y25 w400 h400 , %logoicon%
 	Gui, Show, w450 h450, %title% Logo
 	Gui, Color, 000000
 	return
