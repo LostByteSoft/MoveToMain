@@ -15,13 +15,13 @@
 
 	SetEnv, title, MoveToMain
 	SetEnv, mode, Move Windows To Main Monitor
-	SetEnv, version, Version 2017-10-01-0855
+	SetEnv, version, Version 2017-10-17-1443
 	SetEnv, Author, LostByteSoft
 	SetEnv, logoicon, ico_recycle.ico
 
 	;; User variable, change if you want anything else.
 	SetEnv, shortkey, F4
-	SetEnv, displacement, 1
+	SetEnv, displacement, 3
 
 	SysGet, Mon1, Monitor, 1
 
@@ -30,6 +30,8 @@
 	FileInstall, ico_lock.ico, ico_lock.ico, 0
 	FileInstall, ico_shut.ico, ico_shut.ico, 0
 	FileInstall, ico_recycle.ico, ico_recycle.ico, 0
+	FileInstall, ico_debug.ico, ico_debug.ico, 0
+	FileInstall, ico_reboot.ico, ico_reboot.ico, 0
 
 ;;--- Tray options
 
@@ -46,13 +48,31 @@
 	Menu, tray, add, %version%, about
 	menu, tray, disable, %version%
 	Menu, tray, add,
-	Menu, tray, add, Exit, Close						; Close exit program
-	Menu, Tray, Icon, Exit, ico_shut.ico
+	Menu, tray, add, --== Control ==--, about
+	Menu, Tray, Icon, --== Control ==--, ico_options.ico
+	Menu, tray, add, Exit %title%, Close					; Close exit program
+	Menu, Tray, Icon, Exit %title%, ico_shut.ico
+	Menu, tray, add, Refresh (ini mod), doReload 				; Reload the script.
+	Menu, Tray, Icon, Refresh (ini mod), ico_reboot.ico
+	Menu, tray, add, Set Debug (Toggle), debug
+	Menu, Tray, Icon, Set Debug (Toggle), ico_debug.ico
+	Menu, tray, add, Pause (Toggle), pause
+	Menu, Tray, Icon, Pause (Toggle), ico_pause.ico
 	Menu, tray, add,
-	Menu, tray, add, --== Option(s) ==--, about
-	Menu, Tray, add, Change displacement = %displacement%, changedisp
-	Menu, tray, add, 1 = xywh 0 = xy, about
-	menu, tray, disable, 1 = xywh 0 = xy
+	Menu, tray, add, --== Options ==--, about
+	Menu, Tray, Icon, --== Options ==--, ico_options.ico
+	Menu, Tray, add, Select displacement = 0, changedisp0
+	Menu, tray, add, 0 = xy, about
+	menu, tray, disable, 0 = xy
+	Menu, Tray, add, Select displacement = 1, changedisp1
+	Menu, tray, add, 1 = xywh, about
+	menu, tray, disable, 1 = xywh
+	Menu, Tray, add, Select displacement = 2, changedisp2
+	Menu, tray, add, 2 = xyh, about
+	menu, tray, disable, 2 = xyh
+	Menu, Tray, add, Select displacement = 3, changedisp3
+	Menu, tray, add, 3 = FullScreen (Default), about
+	menu, tray, disable, 3 = FullScreen (Default)
 	Menu, tray, add,
 	Menu, Tray, add, Hotkey = %shortkey%, trayclick
 	Menu, Tray, Icon, Hotkey = %shortkey%, ico_HotKeys.ico
@@ -76,20 +96,84 @@ move:
 	Var3 /= 8
 	SetEnv, Var4, %Var3%
 	Var4 *= 6
-	;;MsgBox, %activeWindow% to %var1% %var3% %var2% %var4%
-	IfEqual, resolution, 1, goto, displacement
 
+	;;MsgBox, %activeWindow% to %var1% %var3% %var2% %var4%
+
+	IfEqual, displacement, 0, goto, displacement0
+	IfEqual, displacement, 1, goto, displacement1
+	IfEqual, displacement, 2, goto, displacement2
+	IfEqual, displacement, 3, goto, displacement3
+	goto, displacement3
+
+	displacement0:
+	;; xy
+	WinMove, %activeWindow%, , %var1%, %var3%,
+	Goto, start
+
+	displacement1:
+	;; xywh
 	WinMove, %activeWindow%, , %var1%, %var3%, %var2%, %var4%
 	Goto, start
 
-	displacement:
-	WinMove, %activeWindow%, , %var1%, %var3%, , ;;%var4%
+	displacement2:
+	;; xyh
+	SetEnv, bottom, %mon1Bottom%
+	bottom -= 38			; 38 traybar
+	WinMove, %activeWindow%, , %var1%, 0,, %bottom%
 	Goto, start
+
+	displacement3:
+	;; xyh
+	SetEnv, bottom, %mon1Bottom%
+	bottom -= 38			; 38 traybar
+	WinMove, %activeWindow%, , 0, 0, %Mon1Right%, %Bottom%
+	Goto, start
+
+;;--- Debug Pause ---
+
+debug:
+	IniRead, debug, MoveActiveToSecondMonitor.ini, options, debug
+	IfEqual, debug, 0, goto, debug1
+	IfEqual, debug, 1, goto, debug0
+
+	debug0:
+	SetEnv, debug, 0
+	IniWrite, 0, MoveActiveToSecondMonitor.ini, options, debug
+	goto, doReload
+
+	debug1:
+	SetEnv, debug, 1
+	IniWrite, 1, MoveActiveToSecondMonitor.ini, options, debug
+	goto, doReload
+
+pause:
+	Ifequal, pause, 0, goto, paused
+	Ifequal, pause, 1, goto, unpaused
+
+	paused:
+	Menu, Tray, Icon, ico_pause.ico
+	SetEnv, pause, 1
+	goto, sleep
+
+	unpaused:	
+	Menu, Tray, Icon, ico_time_w.ico
+	SetEnv, pause, 0
+	Goto, start
+
+	sleep:
+	Menu, Tray, Icon, ico_pause.ico
+	sleep, 24000
+	goto, sleep
 
 ;;--- Quit (escape , esc) ---
 
 Close:
 	ExitApp
+
+doReload:
+	Reload
+	sleep, 500
+	goto, Close
 
 ;;--- Tray Bar (must be at end of file) ---
 
@@ -101,19 +185,21 @@ trayclick:
 	goto, move
 
 
-changedisp:
-	IfEqual, displacement, 0, goto, disp1
-	IfEqual, displacement, 1, goto, disp0
-
-	disp0:
+changedisp0:
 	SetEnv, displacement, 0
-	Menu, Tray, Rename, Change displacement = 1, Change displacement = 0
 	Return
 
-	disp1:
+changedisp1:
 	SetEnv, displacement, 1
-	Menu, Tray, Rename, Change displacement = 0, Change displacement = 1
-	return
+	Return
+
+changedisp2:
+	SetEnv, displacement, 2
+	Return
+
+changedisp3:
+	SetEnv, displacement, 3
+	Return
 
 secret:
 	MsgBox, 48, %title%,title=%title% mode=%mode% version=%version% author=%author% shortkey=%shortkey% displacement=%displacement% logoicon=%logoicon% A_ScriptDir=%A_ScriptDir%`n`nMain screen resolution Left: %Mon1Left% -- Top: %Mon1Top% -- Right: %Mon1Right% -- Bottom %Mon1Bottom%
