@@ -15,12 +15,12 @@
 
 	SetEnv, title, MoveToMain
 	SetEnv, mode, Move Windows To Main Monitor
-	SetEnv, version, Version 2017-10-17-1443
+	SetEnv, version, Version 2017-11-11-1031
 	SetEnv, Author, LostByteSoft
 	SetEnv, logoicon, ico_recycle.ico
 
 	;; User variable, change if you want anything else.
-	SetEnv, shortkey, F4
+	SetEnv, shortkey, F2
 	SetEnv, displacement, 3
 
 	SysGet, Mon1, Monitor, 1
@@ -32,6 +32,8 @@
 	FileInstall, ico_recycle.ico, ico_recycle.ico, 0
 	FileInstall, ico_debug.ico, ico_debug.ico, 0
 	FileInstall, ico_reboot.ico, ico_reboot.ico, 0
+	FileInstall, ico_options.ico, ico_options.ico, 0
+	FileInstall, ico_pause.ico, ico_pause.ico, 0
 
 ;;--- Tray options
 
@@ -61,18 +63,10 @@
 	Menu, tray, add,
 	Menu, tray, add, --== Options ==--, about
 	Menu, Tray, Icon, --== Options ==--, ico_options.ico
-	Menu, Tray, add, Select displacement = 0, changedisp0
-	Menu, tray, add, 0 = xy, about
-	menu, tray, disable, 0 = xy
-	Menu, Tray, add, Select displacement = 1, changedisp1
-	Menu, tray, add, 1 = xywh, about
-	menu, tray, disable, 1 = xywh
-	Menu, Tray, add, Select displacement = 2, changedisp2
-	Menu, tray, add, 2 = xyh, about
-	menu, tray, disable, 2 = xyh
-	Menu, Tray, add, Select displacement = 3, changedisp3
-	Menu, tray, add, 3 = FullScreen (Default), about
-	menu, tray, disable, 3 = FullScreen (Default)
+	Menu, Tray, add, Select displacement = 0 = xy, changedisp0
+	Menu, Tray, add, Select displacement = 1 = xywh, changedisp1
+	Menu, Tray, add, Select displacement = 2 = xyh, changedisp2
+	Menu, Tray, add, Select displacement = 3 = Full, changedisp3
 	Menu, tray, add,
 	Menu, Tray, add, Hotkey = %shortkey%, trayclick
 	Menu, Tray, Icon, Hotkey = %shortkey%, ico_HotKeys.ico
